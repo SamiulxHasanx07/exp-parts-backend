@@ -1,31 +1,57 @@
 const express = require('express');
-const cors =  require('cors');
+const cors = require('cors');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
-const app =  express();
+const app = express();
 
 
 app.use(cors());
 app.use(express.json());
 
 
-async function run(){
-   try{
-    app.get('/test', async(req, res)=>{
-        res.send('yeah its working')
-    })
-   }
-   finally{
 
-   }
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.owb2v.mongodb.net/?retryWrites=true&w=majority`;
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+// client.connect(err => {
+//     // perform actions on the collection object
+//     client.close();
+// });
+
+
+
+
+async function run() {
+    await client.connect()
+    const productsCollection = client.db("exoparts").collection("products");
+
+
+    try {
+
+        
+        // Post Product API
+        app.post('/products', async (req, res) => {
+            const product = req.body;
+            const result = await productsCollection.insertOne(product);
+            res.send(result)
+        })
+
+
+
+
+
+    }
+    finally {
+
+    }
 }
 
 run().catch(console.dir)
 
-app.get('/', (req, res)=>{
+app.get('/', (req, res) => {
     res.send('server is running')
 })
 
-app.listen(port, ()=>{
+app.listen(port, () => {
     console.log('Server running in port: ', port);
 })
