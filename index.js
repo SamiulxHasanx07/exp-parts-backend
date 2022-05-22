@@ -27,8 +27,6 @@ async function run() {
 
 
     try {
-
-        
         // Post Product API
         app.post('/products', async (req, res) => {
             const product = req.body;
@@ -36,6 +34,11 @@ async function run() {
             res.send(result)
         })
 
+        // Get All Products API
+        app.get('/products', async (req, res) => {
+            const result = await productsCollection.find({}).toArray();
+            res.send(result)
+        })
 
 
 
