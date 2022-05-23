@@ -19,11 +19,11 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 // });
 
 
-
-
 async function run() {
     await client.connect()
     const productsCollection = client.db("exoparts").collection("products");
+    const userCollection = client.db("exoparts").collection("users");
+    const ordersCollection = client.db("exoparts").collection("orders");
 
 
     try {
@@ -33,19 +33,40 @@ async function run() {
             const result = await productsCollection.insertOne(product);
             res.send(result)
         })
-        
+
         // Get All Products API
         app.get('/products', async (req, res) => {
             const result = await productsCollection.find({}).toArray();
             res.send(result)
         })
-        
+
         //get signle product by id
-        app.get('/product/:id', async(req, res)=>{
-            const id =  req.params.id;
-            const query =  {_id:ObjectId(id)};
-            const result =  await productsCollection.findOne(query);
-            res.send(result);  
+        app.get('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.findOne(query);
+            res.send(result);
+        })
+
+        app.post('/orders', async (req, res) => {
+            const data = (req.body);
+            const result = await ordersCollection.insertOne(data);
+            res.send(result)
+
+        })
+
+
+        // {
+        //     "name": "sam",
+        //     "email": "sam1.hasanx650@gmail.com",
+        //     "role":"admin",
+        //     "photo":""
+
+        // }
+        app.post('/users', async (req, res) => {
+            const data = req.body;
+            const result = await userCollection.insertOne(data);
+            res.send(result)
         })
 
     }
