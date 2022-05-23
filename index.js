@@ -69,6 +69,11 @@ async function run() {
             res.send(result)
         })
 
+
+        app.get('/orders', async(req, res)=>{
+            const result = await ordersCollection.find({}).toArray();
+            res.send(result)
+        })
         // {
         //     "name": "sam",
         //     "email": "sam1.hasanx650@gmail.com",
