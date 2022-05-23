@@ -55,6 +55,19 @@ async function run() {
 
         })
 
+        // patch api 
+        app.patch('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const availabe =  req.body.available;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    available: availabe
+                }
+            }
+            const result = await productsCollection.updateOne(filter, updateDoc);
+            res.send(result)
+        })
 
         // {
         //     "name": "sam",
