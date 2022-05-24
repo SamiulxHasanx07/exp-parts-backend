@@ -75,6 +75,14 @@ async function run() {
             res.send(result)
         })
 
+        // orders by user email
+        app.get('/orders/:email', async(req, res)=>{
+            const email =  req.params.email;
+            const filter =  {email:email};
+            const result = await ordersCollection.find(filter).toArray();
+            res.send(result)
+        })
+
         app.delete('/order/:id', async(req, res)=>{
             const id =  req.params.id;
             const filter =  {_id:ObjectId(id)};
