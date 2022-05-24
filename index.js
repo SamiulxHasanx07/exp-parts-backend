@@ -102,12 +102,24 @@ async function run() {
             const result = await userCollection.insertOne(data);
             res.send(result)
         })
+        app.get('/user/:email', async (req, res) => {
+            const email =  req.params.email;
+            const filter = {email:email};
+            const result = await userCollection.find(filter).toArray();
+            res.send(result)
+        })
 
 
         // Reviews Api 
         app.get('/reviews', async(req, res)=>{
             const result = await reviewsCollection.find({}).toArray();
             res.send(result)
+        })
+
+        app.post('/reviews', async(req, res)=>{
+            const data =  req.body;
+            const result = await reviewsCollection.insertOne(data);
+            res.send(result)            
         })
 
     }
