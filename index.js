@@ -59,7 +59,7 @@ async function run() {
         // patch api 
         app.patch('/product/:id', async (req, res) => {
             const id = req.params.id;
-            const availabe =  req.body.available;
+            const availabe = req.body.available;
             const filter = { _id: ObjectId(id) };
             const updateDoc = {
                 $set: {
@@ -71,23 +71,23 @@ async function run() {
         })
 
 
-        app.get('/orders', async(req, res)=>{
+        app.get('/orders', async (req, res) => {
             const result = await ordersCollection.find({}).toArray();
             res.send(result)
         })
 
         // orders by user email
-        app.get('/orders/:email', async(req, res)=>{
-            const email =  req.params.email;
-            const filter =  {email:email};
+        app.get('/orders/:email', async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
             const result = await ordersCollection.find(filter).toArray();
             res.send(result)
         })
 
-        app.delete('/order/:id', async(req, res)=>{
-            const id =  req.params.id;
-            const filter =  {_id:ObjectId(id)};
-            const result =  await ordersCollection.deleteOne(filter);
+        app.delete('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await ordersCollection.deleteOne(filter);
             res.send(result)
         })
         // {
@@ -102,24 +102,41 @@ async function run() {
             const result = await userCollection.insertOne(data);
             res.send(result)
         })
+
         app.get('/user/:email', async (req, res) => {
-            const email =  req.params.email;
-            const filter = {email:email};
-            const result = await userCollection.find(filter).toArray();
+            const email = req.params.email;
+            const filter = { email: email };
+            const result = await userCollection.findOne(filter);
             res.send(result)
         })
 
+        app.patch('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const data =  req.body;
+            const filter = { email: email };
+            const {name, phone, education, address, github, photo} = data;
+            
+            const updateDoc = {
+                $set: {
+                    name: name, phone:phone, education: education, address:address, github:github, photo:photo
+                }
+            }
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result)
+            console.log(data);
+
+        })
 
         // Reviews Api 
-        app.get('/reviews', async(req, res)=>{
+        app.get('/reviews', async (req, res) => {
             const result = await reviewsCollection.find({}).toArray();
             res.send(result)
         })
 
-        app.post('/reviews', async(req, res)=>{
-            const data =  req.body;
+        app.post('/reviews', async (req, res) => {
+            const data = req.body;
             const result = await reviewsCollection.insertOne(data);
-            res.send(result)            
+            res.send(result)
         })
 
     }
