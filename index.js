@@ -24,6 +24,7 @@ async function run() {
     const productsCollection = client.db("exoparts").collection("products");
     const userCollection = client.db("exoparts").collection("users");
     const ordersCollection = client.db("exoparts").collection("orders");
+    const reviewsCollection = client.db("exoparts").collection("reviews");
 
 
     try {
@@ -99,6 +100,13 @@ async function run() {
         app.post('/users', async (req, res) => {
             const data = req.body;
             const result = await userCollection.insertOne(data);
+            res.send(result)
+        })
+
+
+        // Reviews Api 
+        app.get('/reviews', async(req, res)=>{
+            const result = await reviewsCollection.find({}).toArray();
             res.send(result)
         })
 
