@@ -35,14 +35,24 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 
 async function run() {
-    await client.connect()
-    const productsCollection = client.db("exoparts").collection("products");
-    const userCollection = client.db("exoparts").collection("users");
-    const ordersCollection = client.db("exoparts").collection("orders");
-    const reviewsCollection = client.db("exoparts").collection("reviews");
-
 
     try {
+        await client.connect()
+        const productsCollection = client.db("exoparts").collection("products");
+        const userCollection = client.db("exoparts").collection("users");
+        const ordersCollection = client.db("exoparts").collection("orders");
+        const reviewsCollection = client.db("exoparts").collection("reviews");
+
+
+        const verifyAdmin =  async (req, res, next)=>{
+            const isAdmin =  req.decoded.email;
+            const adminChk = await userCollection.findOne({email:isAdmin});
+            if(adminChk.role === 'admin'){
+                next()
+            }else{
+                res.status(403).send({message:'forbidden access'})
+            }
+        }
 
         // User Login
         app.post('/login', async (req, res) => {
@@ -55,7 +65,7 @@ async function run() {
 
 
         // Post Product API
-        app.post('/products', verifyJWT, async (req, res) => {
+        app.post('/products', verifyJWT, verifyAdmin, async (req, res) => {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
             res.send(result)
@@ -75,7 +85,7 @@ async function run() {
             res.send(result);
         })
         //delete signle product by id
-        app.delete('/product/:id', verifyJWT, async (req, res) => {
+        app.delete('/product/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await productsCollection.deleteOne(query);
@@ -131,8 +141,8 @@ async function run() {
                 const filter = { email: email };
                 const result = await ordersCollection.find(filter).toArray();
                 res.send(result)
-            }else{
-                res.status(403).send({message:'Forbidden Access'})
+            } else {
+                res.status(403).send({ message: 'Forbidden Access' })
             }
         })
 
@@ -189,7 +199,7 @@ async function run() {
 
         })
 
-        app.patch('/make-admin/:email', async (req, res) => {
+        app.patch('/make-admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
             const email = req.params.email;
             console.log(email);
             const filter = { email: email };
