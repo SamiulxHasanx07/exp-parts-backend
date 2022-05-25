@@ -48,11 +48,12 @@ async function run() {
             const result = await productsCollection.findOne(query);
             res.send(result);
         })
-        app.post('/orders', async (req, res) => {
-            const data = (req.body);
-            const result = await ordersCollection.insertOne(data);
-            res.send(result)
-
+        //delete signle product by id
+        app.delete('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(query);
+            res.send(result);
         })
 
         // patch api 
@@ -69,6 +70,13 @@ async function run() {
             res.send(result)
         })
 
+
+        app.post('/orders', async (req, res) => {
+            const data = (req.body);
+            const result = await ordersCollection.insertOne(data);
+            res.send(result)
+
+        })
 
         app.get('/orders', async (req, res) => {
             const result = await ordersCollection.find({}).toArray();
