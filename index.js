@@ -71,6 +71,20 @@ async function run() {
         })
 
 
+        // patch product edit api 
+        app.patch('/pd/:id', async (req, res) => {
+            const id = req.params.id;
+            const data = req.body;
+            const {name, price, minOrder, available, image, description} =  data;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    name, price, minOrder, available, image, description 
+                }
+            }
+            const result = await productsCollection.updateOne(filter, updateDoc);
+            res.send(result)
+        })
         app.post('/orders', async (req, res) => {
             const data = (req.body);
             const result = await ordersCollection.insertOne(data);
