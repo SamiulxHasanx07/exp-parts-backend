@@ -3,6 +3,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 const app = express();
 
@@ -44,13 +45,13 @@ async function run() {
         const reviewsCollection = client.db("exoparts").collection("reviews");
 
 
-        const verifyAdmin =  async (req, res, next)=>{
-            const isAdmin =  req.decoded.email;
-            const adminChk = await userCollection.findOne({email:isAdmin});
-            if(adminChk.role === 'admin'){
+        const verifyAdmin = async (req, res, next) => {
+            const isAdmin = req.decoded.email;
+            const adminChk = await userCollection.findOne({ email: isAdmin });
+            if (adminChk.role === 'admin') {
                 next()
-            }else{
-                res.status(403).send({message:'forbidden access'})
+            } else {
+                res.status(403).send({ message: 'forbidden access' })
             }
         }
 
@@ -144,6 +145,13 @@ async function run() {
             } else {
                 res.status(403).send({ message: 'Forbidden Access' })
             }
+        })
+
+        app.get('/order/:id', async (req, res) => {
+            const id = (req.params.id);
+            const filter = { _id: ObjectId(id) };
+            const order = await ordersCollection.findOne(filter);
+            res.send(order)
         })
 
         app.delete('/order/:id', verifyJWT, async (req, res) => {
