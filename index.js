@@ -48,7 +48,6 @@ async function run() {
             const result = await productsCollection.findOne(query);
             res.send(result);
         })
-
         app.post('/orders', async (req, res) => {
             const data = (req.body);
             const result = await ordersCollection.insertOne(data);
@@ -116,19 +115,45 @@ async function run() {
 
         app.patch('/user/:email', async (req, res) => {
             const email = req.params.email;
-            const data =  req.body;
+            const data = req.body;
             const filter = { email: email };
-            const {name, phone, education, address, github, photo} = data;
-            
+            const { name, phone, education, address, github, photo } = data;
+
+            console.log(data);
             const updateDoc = {
                 $set: {
-                    name: name, phone:phone, education: education, address:address, github:github, photo:photo
+                    name: name, phone: phone, education: education, address: address, github: github, photo: photo
                 }
             }
             const result = await userCollection.updateOne(filter, updateDoc);
             res.send(result)
-            console.log(data);
 
+        })
+
+        app.patch('/make-admin/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const filter = { email: email };
+            const updateDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            }
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result)
+        })
+
+        app.patch('/remove-admin/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const filter = { email: email };
+            const updateDoc = {
+                $set: {
+                    role: 'customer'
+                }
+            }
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result)
         })
 
         // Reviews Api 
