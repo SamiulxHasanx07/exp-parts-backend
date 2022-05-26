@@ -29,11 +29,6 @@ function verifyJWT(req, res, next) {
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.owb2v.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-// client.connect(err => {
-//     // perform actions on the collection object
-//     client.close();
-// });
-
 
 async function run() {
 
@@ -77,13 +72,23 @@ async function run() {
                     transactionId: payment.transactionId
                 }
             }
-
             const result = await paymentCollection.insertOne(payment);
-            const updatedBooking = await ordersCollection.updateOne(filter, updatedDoc);
-            res.send(updatedBooking);
+            const updateOrder = await ordersCollection.updateOne(filter, updatedDoc);
+            res.send(updateOrder);
         })
 
+        app.patch('/manageshipped/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    status: 'Shipped',
+                }
+            }
+            const updateStatus = await ordersCollection.updateOne(filter, updateDoc);
+            res.send(updateStatus)
 
+        })
 
         // User Login
         app.post('/login', async (req, res) => {
@@ -93,7 +98,6 @@ async function run() {
             })
             res.send({ accessToken })
         })
-
 
         // Post Product API
         app.post('/products', verifyJWT, verifyAdmin, async (req, res) => {
@@ -139,7 +143,7 @@ async function run() {
 
 
         // patch product edit api 
-        app.patch('/pd/:id', async (req, res) => {
+        app.patch('/pd/:id', verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const data = req.body;
             const { name, price, minOrder, available, image, description } = data;
@@ -152,6 +156,7 @@ async function run() {
             const result = await productsCollection.updateOne(filter, updateDoc);
             res.send(result)
         })
+
         app.post('/orders', async (req, res) => {
             const data = (req.body);
             const result = await ordersCollection.insertOne(data);
@@ -190,13 +195,6 @@ async function run() {
             const result = await ordersCollection.deleteOne(filter);
             res.send(result)
         })
-        // {
-        //     "name": "sam",
-        //     "email": "sam1.hasanx650@gmail.com",
-        //     "role":"admin",
-        //     "photo":""
-
-        // }
         app.get('/users', async (req, res) => {
             const result = await userCollection.find({}).toArray();
             res.send(result)
@@ -220,7 +218,7 @@ async function run() {
             res.send(result)
         })
 
-        app.patch('/user/:email', async (req, res) => {
+        app.patch('/user/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const data = req.body;
             const filter = { email: email };
@@ -250,7 +248,7 @@ async function run() {
             res.send(result)
         })
 
-        app.patch('/remove-admin/:email', async (req, res) => {
+        app.patch('/remove-admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
             const email = req.params.email;
             console.log(email);
             const filter = { email: email };
