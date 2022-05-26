@@ -43,6 +43,7 @@ async function run() {
         const userCollection = client.db("exoparts").collection("users");
         const ordersCollection = client.db("exoparts").collection("orders");
         const reviewsCollection = client.db("exoparts").collection("reviews");
+        const paymentCollection = client.db("exoparts").collection("payments");
 
 
         const verifyAdmin = async (req, res, next) => {
@@ -54,6 +55,35 @@ async function run() {
                 res.status(403).send({ message: 'forbidden access' })
             }
         }
+
+        app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+            const { price } = req.body;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+            res.send({ clientSecret: paymentIntent.client_secret })
+        })
+
+        app.patch('/order/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: 'paid',
+                    transactionId: payment.transactionId
+                }
+            }
+
+            const result = await paymentCollection.insertOne(payment);
+            const updatedBooking = await ordersCollection.updateOne(filter, updatedDoc);
+            res.send(updatedBooking);
+        })
+
+
 
         // User Login
         app.post('/login', async (req, res) => {
@@ -129,7 +159,7 @@ async function run() {
 
         })
 
-        app.get('/orders', verifyJWT, async (req, res) => {
+        app.get('/orders', verifyJWT, verifyAdmin, async (req, res) => {
             const result = await ordersCollection.find({}).toArray();
             res.send(result)
         })
