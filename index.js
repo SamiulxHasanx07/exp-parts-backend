@@ -142,7 +142,7 @@ async function run() {
 
 
         // patch product edit api 
-        app.patch('/pd/:id', verifyAdmin, async (req, res) => {
+        app.patch('/pd/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const data = req.body;
             const { name, price, minOrder, available, image, description } = data;
