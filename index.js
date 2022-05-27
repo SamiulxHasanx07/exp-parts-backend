@@ -7,9 +7,23 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 const app = express();
 
+const corsConfig = {
+    origin: '*',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+}
+app.use(cors(corsConfig))
+app.options("*", cors(corsConfig))
+app.use(express.json())
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,authorization")
+    next()
+})
 
-app.use(cors());
-app.use(express.json());
+
+// app.use(cors());
+// app.use(express.json());
 
 // verify user token
 function verifyJWT(req, res, next) {
@@ -99,7 +113,7 @@ async function run() {
             res.send({ accessToken })
         })
 
-        // Post Product API
+        // Post Product API 
         app.post('/products', verifyJWT, verifyAdmin, async (req, res) => {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
